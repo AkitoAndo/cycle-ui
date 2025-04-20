@@ -7,6 +7,8 @@ struct TagManagementView: View {
     @State private var newTagName = ""
     @State private var editingTag: Tag?
     @State private var editingTagName = ""
+    @State private var showingError = false
+    @State private var errorMessage = ""
     
     var body: some View {
         NavigationView {
@@ -16,8 +18,12 @@ struct TagManagementView: View {
                         TextField("新規タグ名", text: $newTagName)
                         Button("追加") {
                             if !newTagName.isEmpty {
-                                viewModel.addTag(name: newTagName)
-                                newTagName = ""
+                                if viewModel.addTag(name: newTagName) {
+                                    newTagName = ""
+                                } else {
+                                    errorMessage = "同じ名前のタグが既に存在します"
+                                    showingError = true
+                                }
                             }
                         }
                         .disabled(newTagName.isEmpty)
@@ -34,9 +40,13 @@ struct TagManagementView: View {
                                     if !editingTagName.isEmpty {
                                         var updatedTag = tag
                                         updatedTag.name = editingTagName
-                                        viewModel.updateTag(updatedTag)
-                                        editingTag = nil
-                                        editingTagName = ""
+                                        if viewModel.updateTag(updatedTag) {
+                                            editingTag = nil
+                                            editingTagName = ""
+                                        } else {
+                                            errorMessage = "同じ名前のタグが既に存在します"
+                                            showingError = true
+                                        }
                                     }
                                 }
                                 .disabled(editingTagName.isEmpty)
@@ -76,6 +86,11 @@ struct TagManagementView: View {
                         .font(.headline)
                         .foregroundColor(.white)
                 }
+            }
+            .alert("エラー", isPresented: $showingError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(errorMessage)
             }
         }
     }
