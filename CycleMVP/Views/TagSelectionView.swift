@@ -6,6 +6,8 @@ struct TagSelectionView: View {
     @Binding var selectedTags: Set<UUID>
     
     @State private var newTagName = ""
+    @State private var editingTag: Tag?
+    @State private var editingTagName = ""
     
     var body: some View {
         NavigationView {
@@ -26,19 +28,45 @@ struct TagSelectionView: View {
                 Section(header: Text("タグ一覧")) {
                     ForEach(viewModel.tags) { tag in
                         HStack {
-                            Text(tag.name)
-                            Spacer()
-                            if selectedTags.contains(tag.id) {
-                                Image(systemName: "checkmark")
-                                    .foregroundColor(.blue)
-                            }
-                        }
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            if selectedTags.contains(tag.id) {
-                                selectedTags.remove(tag.id)
+                            if editingTag?.id == tag.id {
+                                TextField("タグ名", text: $editingTagName)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                Button("保存") {
+                                    if !editingTagName.isEmpty {
+                                        var updatedTag = tag
+                                        updatedTag.name = editingTagName
+                                        viewModel.updateTag(updatedTag)
+                                        editingTag = nil
+                                        editingTagName = ""
+                                    }
+                                }
+                                .disabled(editingTagName.isEmpty)
                             } else {
-                                selectedTags.insert(tag.id)
+                                HStack {
+                                    Text(tag.name)
+                                    Spacer()
+                                    if selectedTags.contains(tag.id) {
+                                        Image(systemName: "checkmark")
+                                            .foregroundColor(.blue)
+                                    }
+                                }
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    if selectedTags.contains(tag.id) {
+                                        selectedTags.remove(tag.id)
+                                    } else {
+                                        selectedTags.insert(tag.id)
+                                    }
+                                }
+                                
+                                Button(action: {
+                                    editingTag = tag
+                                    editingTagName = tag.name
+                                }) {
+                                    Image(systemName: "pencil")
+                                        .foregroundColor(.blue)
+                                }
+                                .buttonStyle(BorderlessButtonStyle())
                             }
                         }
                     }

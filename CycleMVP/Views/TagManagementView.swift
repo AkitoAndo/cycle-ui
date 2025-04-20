@@ -5,6 +5,8 @@ struct TagManagementView: View {
     @ObservedObject var viewModel: JournalViewModel
     
     @State private var newTagName = ""
+    @State private var editingTag: Tag?
+    @State private var editingTagName = ""
     
     var body: some View {
         NavigationView {
@@ -24,7 +26,32 @@ struct TagManagementView: View {
                 
                 Section(header: Text("タグ一覧")) {
                     ForEach(viewModel.tags) { tag in
-                        Text(tag.name)
+                        HStack {
+                            if editingTag?.id == tag.id {
+                                TextField("タグ名", text: $editingTagName)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                Button("保存") {
+                                    if !editingTagName.isEmpty {
+                                        var updatedTag = tag
+                                        updatedTag.name = editingTagName
+                                        viewModel.updateTag(updatedTag)
+                                        editingTag = nil
+                                        editingTagName = ""
+                                    }
+                                }
+                                .disabled(editingTagName.isEmpty)
+                            } else {
+                                Text(tag.name)
+                                Spacer()
+                                Button(action: {
+                                    editingTag = tag
+                                    editingTagName = tag.name
+                                }) {
+                                    Image(systemName: "pencil")
+                                        .foregroundColor(.blue)
+                                }
+                            }
+                        }
                     }
                     .onDelete { indexSet in
                         for index in indexSet {
