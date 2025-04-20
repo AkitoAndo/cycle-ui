@@ -6,6 +6,8 @@ class JournalViewModel: ObservableObject {
     @Published var tags: [Tag] = []
     @Published var searchText = ""
     @Published var selectedFilterTags: Set<UUID> = []
+    @Published var startDate: Date? = nil
+    @Published var endDate: Date? = nil
     
     // ジャーナルの追加
     func addJournal(title: String, content: String, tagIds: [UUID]) {
@@ -90,6 +92,17 @@ class JournalViewModel: ObservableObject {
             }
         }
         
+        // 期間によるフィルタリング
+        if let startDate = startDate, let endDate = endDate {
+            filtered = filtered.filter { journal in
+                let calendar = Calendar.current
+                let journalDate = calendar.startOfDay(for: journal.createdAt)
+                let start = calendar.startOfDay(for: startDate)
+                let end = calendar.startOfDay(for: endDate)
+                return journalDate >= start && journalDate <= end
+            }
+        }
+        
         return filtered
     }
     
@@ -97,5 +110,7 @@ class JournalViewModel: ObservableObject {
     func clearFilter() {
         searchText = ""
         selectedFilterTags.removeAll()
+        startDate = nil
+        endDate = nil
     }
 } 
