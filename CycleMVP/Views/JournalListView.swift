@@ -12,6 +12,9 @@ struct JournalListView: View {
                         NavigationLink(destination: JournalDetailView(journal: journal, viewModel: viewModel)) {
                             HStack(alignment: .top, spacing: 16) {
                                 VStack(alignment: .center) {
+                                    Text(timeFormatter.string(from: journal.createdAt))
+                                        .font(.caption)
+                                        .foregroundColor(.blue)
                                     Text("\(calendar.component(.day, from: journal.createdAt))")
                                         .font(.title)
                                         .foregroundColor(.blue)
@@ -92,6 +95,12 @@ struct JournalListView: View {
     private let monthFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "M月"
+        return formatter
+    }()
+    
+    private let timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
         return formatter
     }()
 } 

@@ -140,7 +140,8 @@ struct JournalDetailView: View {
     
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy年M月d日"
+        formatter.dateFormat = "yyyy年M月d日(E)HH:mm"
+        formatter.locale = Locale(identifier: "ja_JP")
         return formatter
     }()
 } 
