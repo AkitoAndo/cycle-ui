@@ -4,12 +4,43 @@ struct JournalListView: View {
     @StateObject private var viewModel = JournalViewModel()
     @State private var showingAddJournal = false
     @State private var showingTagModal = false
+    @State private var showingSearchFilter = false
     
     var body: some View {
         NavigationView {
             ZStack(alignment: .bottom) {
                 List {
-                    ForEach(viewModel.journals) { journal in
+                    if !viewModel.searchText.isEmpty || !viewModel.selectedFilterTags.isEmpty {
+                        Section {
+                            HStack {
+                                if !viewModel.searchText.isEmpty {
+                                    Text("キーワード: \(viewModel.searchText)")
+                                        .font(.caption)
+                                        .foregroundColor(.blue)
+                                }
+                                
+                                if !viewModel.selectedFilterTags.isEmpty {
+                                    let tagNames = viewModel.selectedFilterTags.compactMap { tagId in
+                                        viewModel.tags.first(where: { $0.id == tagId })?.name
+                                    }.joined(separator: "、")
+                                    Text("タグ: \(tagNames)")
+                                        .font(.caption)
+                                        .foregroundColor(.blue)
+                                }
+                                
+                                Spacer()
+                                
+                                Button(action: { viewModel.clearFilter() }) {
+                                    Text("絞り込みをクリア")
+                                        .font(.caption)
+                                        .foregroundColor(.blue)
+                                }
+                            }
+                            .padding(.vertical, 4)
+                        }
+                    }
+                    
+                    ForEach(viewModel.filteredJournals) { journal in
                         NavigationLink(destination: JournalDetailView(journal: journal, viewModel: viewModel)) {
                             HStack(alignment: .top, spacing: 16) {
                                 VStack(alignment: .center) {
@@ -57,7 +88,7 @@ struct JournalListView: View {
                     }
                     .onDelete { indexSet in
                         for index in indexSet {
-                            viewModel.deleteJournal(viewModel.journals[index])
+                            viewModel.deleteJournal(viewModel.filteredJournals[index])
                         }
                     }
                 }
@@ -99,12 +130,21 @@ struct JournalListView: View {
                         .font(.headline)
                         .foregroundColor(.white)
                 }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { showingSearchFilter = true }) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.white)
+                    }
+                }
             }
             .sheet(isPresented: $showingAddJournal) {
                 AddJournalView(viewModel: viewModel)
             }
             .sheet(isPresented: $showingTagModal) {
                 TagManagementView(viewModel: viewModel)
+            }
+            .sheet(isPresented: $showingSearchFilter) {
+                SearchFilterView(viewModel: viewModel)
             }
         }
     }
