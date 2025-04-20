@@ -11,7 +11,7 @@ import SwiftUI
 struct CycleMVPApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            JournalListView()
         }
     }
 }
