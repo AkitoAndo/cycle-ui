@@ -3,10 +3,11 @@ import SwiftUI
 struct JournalListView: View {
     @StateObject private var viewModel = JournalViewModel()
     @State private var showingAddJournal = false
+    @State private var showingTagModal = false
     
     var body: some View {
         NavigationView {
-            ZStack(alignment: .bottomTrailing) {
+            ZStack(alignment: .bottom) {
                 List {
                     ForEach(viewModel.journals) { journal in
                         NavigationLink(destination: JournalDetailView(journal: journal, viewModel: viewModel)) {
@@ -62,16 +63,31 @@ struct JournalListView: View {
                 }
                 .listStyle(PlainListStyle())
                 
-                Button(action: { showingAddJournal = true }) {
-                    Image(systemName: "plus.circle.fill")
-                        .resizable()
-                        .frame(width: 50, height: 50)
-                        .foregroundColor(.blue)
-                        .background(Color.white)
-                        .clipShape(Circle())
-                        .shadow(radius: 4)
+                HStack(spacing: 20) {
+                    Button(action: { showingTagModal = true }) {
+                        Image(systemName: "tag.circle.fill")
+                            .resizable()
+                            .frame(width: 50, height: 50)
+                            .foregroundColor(.blue)
+                            .background(Color.white)
+                            .clipShape(Circle())
+                            .shadow(radius: 4)
+                    }
+                    .padding(.leading, 20)
+                    
+                    Spacer()
+                    
+                    Button(action: { showingAddJournal = true }) {
+                        Image(systemName: "plus.circle.fill")
+                            .resizable()
+                            .frame(width: 50, height: 50)
+                            .foregroundColor(.blue)
+                            .background(Color.white)
+                            .clipShape(Circle())
+                            .shadow(radius: 4)
+                    }
+                    .padding(.trailing, 20)
                 }
-                .padding(.trailing, 20)
                 .padding(.bottom, 20)
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -86,6 +102,9 @@ struct JournalListView: View {
             }
             .sheet(isPresented: $showingAddJournal) {
                 AddJournalView(viewModel: viewModel)
+            }
+            .sheet(isPresented: $showingTagModal) {
+                TagManagementView(viewModel: viewModel)
             }
         }
     }
